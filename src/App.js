@@ -1,25 +1,22 @@
-import logo from './logo.svg';
+import { NavLink, Outlet } from "react-router-dom";
 import './App.css';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+  return <>
+    <div className="app_container">
+      <h1>Pregled Knjiga :) </h1>
+      <aside className="sidenav_container">
+        <ul className="sidenav_list">
+          <li className="sidenav_list_item"><NavLink className="sidenav_navlink" to="books">Knjige</NavLink></li>
+          <li className="sidenav_list_item"><NavLink className="sidenav_navlink" to="genres">Žanrovi</NavLink></li>
+          <li className="sidenav_list_item"><NavLink className="sidenav_navlink" to="authors">Autori</NavLink></li>
+        </ul>
+      </aside>
+      <div className="app_content">
+        <Outlet/>
+      </div>
     </div>
-  );
+  </>;
 }
 
 export default App;
