@@ -10,7 +10,7 @@ const NewAuthor = () => {
         if(fetcher.data){
             nav(-1);
         }
-    }, [fetcher]);
+    }, [fetcher, nav]);
     return <div>
         <label>Ime: <input value={n} onChange={(e) => setN(e.target.value)}/></label><br/>
         <button onClick={e => {

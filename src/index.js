@@ -9,6 +9,7 @@ import Genre from './Genre';
 import NewGenre from './NewGenre';
 import Author from './Author';
 import NewAuthor from './NewAuthor';
+import Book from './Book';
 
 const BookError = () => {
   const error = useRouteError();
@@ -153,6 +154,32 @@ const router = createBrowserRouter([
             const data = Object.fromEntries(await request.formData());
             return fetch(`http://localhost:8080/api/v1/author`, {
               method: 'POST',
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data)
+            });
+          }
+        }
+      },
+      {
+        path: "books/:id",
+        element: <Book></Book>,
+        errorElement: <BookError/>,
+        loader: async ({params}) => {
+          return fetch(`http://localhost:8080/api/v1/book/${params.id}`);
+        },
+        action: async ({params, request}) => {
+          if(request.method === 'DELETE'){
+            return fetch(`http://localhost:8080/api/v1/book/${params.id}`, {
+              method: 'DELETE'
+            });
+          }else if(request.method === 'PUT'){
+            let data = Object.fromEntries(await request.formData());
+            data.authors = JSON.parse(data.authors);
+            console.log(JSON.stringify(data, null, 4));
+            return fetch(`http://localhost:8080/api/v1/book/${params.id}`, {
+              method: 'PUT',
               headers: {
                 "Content-Type": "application/json",
               },
