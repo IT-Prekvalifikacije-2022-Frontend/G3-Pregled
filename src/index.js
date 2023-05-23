@@ -167,7 +167,13 @@ const router = createBrowserRouter([
         element: <Book></Book>,
         errorElement: <BookError/>,
         loader: async ({params}) => {
-          return fetch(`http://localhost:8080/api/v1/book/${params.id}`);
+          let b = await fetch(`http://localhost:8080/api/v1/book/${params.id}`);
+          let bb = await b.json();
+          let g = await fetch('http://localhost:8080/api/v1/genre/');
+          let gg = await g.json();
+          let a = await fetch('http://localhost:8080/api/v1/author/');
+          let aa = await a.json();
+          return [bb, gg, aa];
         },
         action: async ({params, request}) => {
           if(request.method === 'DELETE'){
