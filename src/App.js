@@ -1,5 +1,4 @@
 import { NavLink, Outlet } from "react-router-dom";
-import './App.css';
 import { AppBar, Box, Divider, Drawer, IconButton, Stack, Toolbar, Typography, Button, createTheme, ThemeProvider, CssBaseline, FormGroup, FormControlLabel, Switch} from "@mui/material";
 import { ChevronLeft, Menu, Mood } from "@mui/icons-material";
 import { useMemo, useState } from "react";
