@@ -10,12 +10,24 @@ export const useLogin = () => {
                 const nuser = {
                     username: 'veljko',
                     name: 'Veljko Petrović',
-                    token: 'deepSecrets'
+                    token: 'deepSecrets',
+                    role: 'admin'
                 };
                 setUser(nuser);
                 localStorage.setItem('user', JSON.stringify(nuser));
                 return nuser;
-            }else{
+            }else if (username === 'user' && password === 'user'){
+                const nuser = {
+                    username: 'user',
+                    name: 'User McUsersson',
+                    token: 'deeperSecrets',
+                    role: 'user'
+                };
+                setUser(nuser);
+                localStorage.setItem('user', JSON.stringify(nuser));
+                return nuser;
+            }
+            else{
                 return null;
             }
         },
@@ -31,7 +43,7 @@ export const get_login = () => {
     return user;
 }
 
-export const check_login = () => {
+export const check_login = (roles) => {
     const user = get_login();
           if(user === null){
             const err = {
@@ -39,6 +51,28 @@ export const check_login = () => {
               message: 'Korisnik nije logovan'
             };
             throw err;
+          }else if(roles){
+            if(!roles.includes(user.role)){
+                console.log(user.role);
+                const err = {
+                    cause: 'security',
+                    message: 'Korisnik nema pravo pristupa'
+                };
+                throw err;
           }
+        }
     return user;
+}
+
+export const valid_login = (roles) => {
+    const user = get_login();
+          if(user === null){
+            return false;
+          }else if(roles){
+            if(!roles.includes(user.role)){
+                console.log(user.role);
+                return false;
+          }
+        }
+    return true;
 }

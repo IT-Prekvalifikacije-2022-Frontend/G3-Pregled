@@ -5,6 +5,31 @@ import { lc_match } from "./tekstAlati";
 import { Add, Delete, Edit } from "@mui/icons-material";
 
 import './Genres.css';
+import { valid_login } from "./login_logic";
+
+const Commands = ({ g, fetcher, nav, admin }) => {
+    if (admin) {
+        return <TableCell>
+            <Stack direction='row'>
+                <IconButton onClick={async (e) => {
+                    fetcher.submit({}, {
+                        method: 'delete',
+                        action: `/genres/${g.id}`
+                    });
+                }}>
+                    <Delete />
+                </IconButton>
+                <IconButton onClick={e => {
+                    nav(`/genres/${g.id}`);
+                }}>
+                    <Edit />
+                </IconButton>
+            </Stack>
+        </TableCell>
+    } else {
+        return null;
+    }
+}
 
 const Genres = () => {
     const genres = useLoaderData();
@@ -22,9 +47,9 @@ const Genres = () => {
         <Stack direction="column" spacing={1} sx={{padding: '40px'}}>
             <Stack direction="row" spacing={1}>
                 <TextField placeholder="Pretraga..." value={q} onChange={e => setQ(e.target.value)} sx={{flexGrow: 1}}/>
-                <IconButton onClick={e => nav('/genres/new')}>
+                {(valid_login(['admin'])) && <IconButton onClick={e => nav('/genres/new')}>
                     <Add/>
-                </IconButton>
+                </IconButton>}
             </Stack>
             <TableContainer component={Paper}>
                 <Table>
@@ -32,30 +57,14 @@ const Genres = () => {
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>Ime</TableCell>
-                            <TableCell>Komande</TableCell>
+                            {(valid_login(['admin'])) && <TableCell>Komande</TableCell>}
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {currentGenres.map(g => <TableRow>
                             <TableCell>{g.id}</TableCell>
                             <TableCell>{g.name}</TableCell>
-                            <TableCell>
-                                <Stack direction='row'>
-                                    <IconButton onClick={async (e) => {
-                                        fetcher.submit({}, {
-                                            method: 'delete',
-                                            action: `/genres/${g.id}`
-                                        });
-                                    }}>
-                                        <Delete/>
-                                    </IconButton>
-                                    <IconButton onClick={e => {
-                                        nav(`/genres/${g.id}`);
-                                    }}>
-                                        <Edit/>
-                                    </IconButton>
-                                </Stack>
-                            </TableCell>
+                            <Commands g={g} fetcher={fetcher} nav={nav} admin={valid_login(['admin'])}/>
                         </TableRow>)}
                     </TableBody>
                 </Table>

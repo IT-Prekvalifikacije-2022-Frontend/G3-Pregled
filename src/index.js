@@ -11,12 +11,19 @@ import Author from './Author';
 import NewAuthor from './NewAuthor';
 import Book from './Book';
 import { check_login, get_login } from './login_logic';
-import {Box, Container, Stack, Typography } from '@mui/material';
+import {Box, Container, Icon, Stack, Typography } from '@mui/material';
+import { Error } from '@mui/icons-material';
 
 const ErrorDisplay = ({entity}) => {
   const error = useRouteError();
   if(error.cause === 'login'){
     return <Navigate to="/"/>;
+  }else if(error.cause === 'security'){
+    return <Container><Stack direction={'row'}>
+      <Icon><Error/></Icon>
+      <Typography variant='h4'>ACCESS DENIED</Typography>
+      <Icon><Error/></Icon>
+    </Stack></Container>
   }
   return <Container>
     <Stack direction={'column'} spacing={1}>
@@ -43,7 +50,7 @@ const router = createBrowserRouter([
         path: "books",
         element: <Books/>,
         loader: async () => {
-          const user = check_login();
+          const user = get_login();
           let b = await fetch("http://localhost:8080/api/v1/book");
           let bb = await b.json();
           let g = await fetch("http://localhost:8080/api/v1/genre");
@@ -57,7 +64,7 @@ const router = createBrowserRouter([
         element: <Genres/>,
         errorElement: <ErrorDisplay entity="žanrova"/>,
         loader: async () => {
-          const user = check_login();
+          const user = get_login();
           return fetch("http://localhost:8080/api/v1/genre");
         }
       },
@@ -66,16 +73,17 @@ const router = createBrowserRouter([
         element: <Genre></Genre>,
         errorElement: <ErrorDisplay entity="žanrova"/>,
         loader: async ({params}) => {
-          const user = check_login();
+          const user = check_login(['admin']);
           return fetch(`http://localhost:8080/api/v1/genre/${params.id}`);
         },
         action: async ({params, request}) => {
-          const user = check_login();
+          const user = check_login(['admin']);
           if(request.method === 'DELETE'){
             return fetch(`http://localhost:8080/api/v1/genre/${params.id}`, {
               method: 'DELETE'
             });
           }else if(request.method === 'PUT'){
+            const user = check_login(['admin']);
             const data = Object.fromEntries(await request.formData());
             return fetch(`http://localhost:8080/api/v1/genre/${params.id}`, {
               method: 'PUT',
@@ -91,8 +99,12 @@ const router = createBrowserRouter([
         path: "genres/new",
         element: <NewGenre/>,
         errorElement: <ErrorDisplay entity="žanrova"/>,
+        loader: () => {
+          const u = check_login(['admin']);
+          return u;
+        },
         action: async ({request}) => {
-          const user = check_login();
+          const user = check_login(['admin']);
           if(request.method === 'POST'){
             const data = Object.fromEntries(await request.formData());
             return fetch(`http://localhost:8080/api/v1/genre`, {
@@ -110,7 +122,7 @@ const router = createBrowserRouter([
         element: <Authors/>,
         errorElement: <ErrorDisplay entity="pisaca"/>,
         loader: async () => {
-          const user = check_login();
+          const user = get_login();
           return fetch("http://localhost:8080/api/v1/author");
         }
       },
@@ -119,16 +131,17 @@ const router = createBrowserRouter([
         element: <Author/>,
         errorElement: <ErrorDisplay entity="pisaca"/>,
         loader: async ({params}) => {
-          const user = check_login();
+          const user = check_login(['admin']);
           return fetch(`http://localhost:8080/api/v1/author/${params.id}`);
         },
         action: async ({params, request}) => {
-          const user = check_login();
+          const user = check_login(['admin']);
           if(request.method === 'DELETE'){
             return fetch(`http://localhost:8080/api/v1/author/${params.id}`, {
               method: 'DELETE'
             });
           }else if(request.method === 'PUT'){
+            const user = check_login(['admin']);
             const data = Object.fromEntries(await request.formData());
             return fetch(`http://localhost:8080/api/v1/author/${params.id}`, {
               method: 'PUT',
@@ -144,8 +157,12 @@ const router = createBrowserRouter([
         path: "authors/new",
         element: <NewAuthor/>,
         errorElement: <ErrorDisplay entity="pisaca"/>,
+        loader: () => {
+          const u = check_login(['admin']);
+          return u;
+        },
         action: async ({request}) => {
-          const user = check_login();
+          const user = check_login(['admin']);
           if(request.method === 'POST'){
             const data = Object.fromEntries(await request.formData());
             return fetch(`http://localhost:8080/api/v1/author`, {
@@ -163,7 +180,7 @@ const router = createBrowserRouter([
         element: <Book></Book>,
         errorElement: <ErrorDisplay entity="pisaca"/>,
         loader: async ({params}) => {
-          const user = check_login();
+          const user = check_login(['admin', 'user']);
           let b = await fetch(`http://localhost:8080/api/v1/book/${params.id}`);
           let bb = await b.json();
           let g = await fetch('http://localhost:8080/api/v1/genre/');
@@ -173,11 +190,13 @@ const router = createBrowserRouter([
           return [bb, gg, aa];
         },
         action: async ({params, request}) => {
+          const user = check_login(['admin']);
           if(request.method === 'DELETE'){
             return fetch(`http://localhost:8080/api/v1/book/${params.id}`, {
               method: 'DELETE'
             });
           }else if(request.method === 'PUT'){
+            const user = check_login(['admin']);
             let data = Object.fromEntries(await request.formData());
             data.authors = JSON.parse(data.authors);
             console.log(JSON.stringify(data, null, 4));
