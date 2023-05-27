@@ -4,6 +4,7 @@ import { Autocomplete, Button, Chip, Container, Paper, Rating, Stack, TextField,
 import { useEffect, useRef, useState } from "react";
 import { validateISBN, validateTitle, validateYear } from "./validacija";
 import { Label } from "@mui/icons-material";
+import { produce } from "immer";
 
 /*
         "title": "The Rise And Fall And Rise And Fall Of The Cyclic Empire",
@@ -35,10 +36,13 @@ const Book = () => {
     const [currentBook, setCurrentBook] = useState(structuredClone(book));
     const generateOnChanged = (t) => {
         return (e) => {
-            setCurrentBook({
+            /*setCurrentBook({
                 ...currentBook,
                 [t] : e.target.value
-            });
+            });*/
+            setCurrentBook(produce(draft => {
+                draft[t] = e.target.value;//normalno ne smem, ali immer to dozvoljava
+            }));
         }
     }
 
@@ -83,10 +87,13 @@ const Book = () => {
                         <Typography>Autori: </Typography>
                         <Stack direction={"row"} border={1} sx={{padding: "20px", flexWrap:'wrap', rowGap:"5px"}} spacing={1}>
                             {currentBook.authors.map((v, ii) => <Chip label={v} onDelete={() => {
-                                setCurrentBook({
+                                /*setCurrentBook({
                                     ...currentBook,
                                     authors: currentBook.authors.filter((v, i) => i !== ii)
-                                });
+                                });*/
+                                setCurrentBook(produce(draft => {
+                                    draft.authors = draft.authors.filter((v, i) => i !== ii);
+                                }));
                             }}/>)}
                         </Stack>
                         <Stack direction={"row"}>
@@ -101,12 +108,14 @@ const Book = () => {
                                     setSelectedAuthor(v);
                                 }} />
                             <Button disabled={selectedAuthor === null} onClick={e => {
-                                console.log(selectedAuthor);
                                 if(selectedAuthor !== null){
-                                    setCurrentBook({
+                                    /*setCurrentBook({
                                         ...currentBook,
                                         authors: [...(currentBook.authors), selectedAuthor.name]
-                                    });
+                                    });*/
+                                    setCurrentBook(produce(draft => {
+                                        draft.authors.push(selectedAuthor.name);
+                                    }));
                                     setSelectedAuthor(null);
                                 }
                             }}>Dodaj</Button>
@@ -120,10 +129,13 @@ const Book = () => {
                                 renderInput={(params) => <TextField {...params} label="Žanr"/>} 
                                 value={strToGenre(currentBook.genre)}
                                 onChange={(e, v) => {
-                                    setCurrentBook({
+                                    /*setCurrentBook({
                                         ...currentBook,
                                         genre : v.name,
-                                    });
+                                    });*/
+                                    setCurrentBook(produce(draft => {
+                                        draft.genre = v.name;
+                                    }));
                                 }}
                             />
 
