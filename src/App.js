@@ -1,8 +1,10 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AppBar, Box, Divider, Drawer, IconButton, Stack, Toolbar, Typography, Button, createTheme, ThemeProvider, CssBaseline, FormGroup, FormControlLabel, Switch} from "@mui/material";
 import { ChevronLeft, Menu, Mood } from "@mui/icons-material";
-import { useMemo, useState } from "react";
+import { createContext, useMemo, useState } from "react";
 import { prvo_veliko } from "./tekstAlati";
+import { useLogin } from "./login_logic";
+import LoginControl from "./LoginControl";
 
 const create_palette = (mode) => {
   let r = {};
@@ -36,12 +38,18 @@ const create_palette = (mode) => {
   }
 }
 
+export const UserContext = createContext(null);
+
 function App() {
   const [otvoreno, setOtvoreno] = useState(false);
   const [mode, setMode] = useState('light');
-  const theme = useMemo(() => createTheme(create_palette(mode)), [mode])
+  const theme = useMemo(() => createTheme(create_palette(mode)), [mode]);
+  const [user, login, logout] = useLogin();
+  const nav = useNavigate();
+  const loc = useLocation();
   return <>
     <ThemeProvider theme={theme}>
+      <UserContext.Provider value={{user, login, logout}}>
       <CssBaseline/>
       <Stack direction="column">
         <AppBar sx={{ height: "60px", flexDirection: "row" }}>
@@ -55,6 +63,7 @@ function App() {
             </IconButton>
           </Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1, textAlign: 'center', lineHeight: 2.5 }}>Pregled Knjiga <Mood /> </Typography>
+          <Typography sx={{lineHeight: 2.5, paddingRight: "30px"}}>{(user) ? `Zdravo ${user.name}` : "Molimo ulogujte se"}</Typography>
         </AppBar>
         <Drawer
           anchor="left"
@@ -66,6 +75,8 @@ function App() {
               <ChevronLeft />
             </IconButton>
           </Box>
+          <Divider />
+              <LoginControl safePath="/" defaultPath="/books"/>
           <Divider />
               <Box>
                 <FormGroup>
@@ -92,6 +103,7 @@ function App() {
           <Outlet />
         </Box>
       </Stack>
+      </UserContext.Provider>
     </ThemeProvider>
   </>;
   /*return <>

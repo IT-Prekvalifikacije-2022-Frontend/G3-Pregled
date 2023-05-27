@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useFetcher, useLoaderData, useNavigate } from "react-router-dom";
-
+import { useFetcher, useNavigate } from "react-router-dom";
+import { Button, Container, Stack, TextField } from "@mui/material";
 //TODO make generic for editing and adding new
 const NewGenre = () => {
     const [n, setN] = useState("");
@@ -11,7 +11,25 @@ const NewGenre = () => {
             nav(-1);
         }
     }, [fetcher, nav]);
-    return <div>
+    return <>
+        <Container maxWidth="sm">
+            <Stack direction={"column"} spacing={1} sx={{ paddingTop: '40px'}}>
+                <TextField label="Ime" value={n} onChange={e => setN(e.target.value)} />
+                <Stack direction={"row-reverse"}>
+                    <Button variant="contained" onClick={e => {
+                        let o = { name: n };
+                        fetcher.submit(o, {
+                            method: 'post',
+                            action: `/genres/new`
+                        });
+                    }}>
+                        Add
+                    </Button>
+                </Stack>
+            </Stack>
+        </Container>
+    </>;
+    /*return <div>
         <label>Ime: <input value={n} onChange={(e) => setN(e.target.value)}/></label><br/>
         <button onClick={e => {
             let o = {name: n};
@@ -20,7 +38,7 @@ const NewGenre = () => {
                 action: `/genres/new`
             });
         }}>Save</button>
-    </div>;
+    </div>;*/
 }
 
 export default NewGenre;

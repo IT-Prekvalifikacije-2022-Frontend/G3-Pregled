@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { RouterProvider, createBrowserRouter, useRouteError } from 'react-router-dom';
+import { Navigate, RouterProvider, createBrowserRouter, useRouteError } from 'react-router-dom';
 import Books from './Books';
 import Genres from './Genres';
 import Authors from './Authors';
@@ -10,41 +10,28 @@ import NewGenre from './NewGenre';
 import Author from './Author';
 import NewAuthor from './NewAuthor';
 import Book from './Book';
+import { check_login, get_login } from './login_logic';
+import {Box, Container, Stack, Typography } from '@mui/material';
 
-const BookError = () => {
+const ErrorDisplay = ({entity}) => {
   const error = useRouteError();
-  return <div className='error_message'>
-    <h2>Desila se greška u učitavanju knjiga</h2>
-    <p>Jako nam je žao. Da li ste pokrenuli back-end server, možda?</p>
-    <h3>Interna greška je: </h3>
-    <pre>
-      {error.message}
-    </pre>
-  </div>
-}
-
-const GenreError = () => {
-  const error = useRouteError();
-  return <div className='error_message'>
-    <h2>Desila se greška u učitavanju žanrova</h2>
-    <p>Jako nam je žao. Da li ste pokrenuli back-end server, možda?</p>
-    <h3>Interna greška je: </h3>
-    <pre>
-      {error.message}
-    </pre>
-  </div>
-}
-
-const AuthorError = () => {
-  const error = useRouteError();
-  return <div className='error_message'>
-    <h2>Desila se greška u učitavanju pisaca.</h2>
-    <p>Jako nam je žao. Da li ste pokrenuli back-end server, možda?</p>
-    <h3>Interna greška je: </h3>
-    <pre>
-      {error.message}
-    </pre>
-  </div>
+  if(error.cause === 'login'){
+    return <Navigate to="/"/>;
+  }
+  return <Container>
+    <Stack direction={'column'} spacing={1}>
+      <Typography variant='h4'>Desila se greška u učitavanju {entity}</Typography>
+      <Typography>
+      Jako nam je žao. Da li ste pokrenuli back-end server, možda? 
+      </Typography>
+      <Typography variant='h6'>Interna greška je: </Typography>
+      <Box>
+        <pre>
+          {error.message}          
+        </pre>
+      </Box>
+    </Stack>
+  </Container>
 }
 
 const router = createBrowserRouter([
@@ -56,30 +43,34 @@ const router = createBrowserRouter([
         path: "books",
         element: <Books/>,
         loader: async () => {
+          const user = check_login();
           let b = await fetch("http://localhost:8080/api/v1/book");
           let bb = await b.json();
           let g = await fetch("http://localhost:8080/api/v1/genre");
           let gg = await g.json();
           return [bb, gg];
         },
-        errorElement: <BookError/>        
+        errorElement: <ErrorDisplay entity="knjiga"/>
       },
       {
         path: "genres",
         element: <Genres/>,
-        errorElement: <GenreError/>,
+        errorElement: <ErrorDisplay entity="žanrova"/>,
         loader: async () => {
+          const user = check_login();
           return fetch("http://localhost:8080/api/v1/genre");
         }
       },
       {
         path: "genres/:id",
         element: <Genre></Genre>,
-        errorElement: <GenreError/>,
+        errorElement: <ErrorDisplay entity="žanrova"/>,
         loader: async ({params}) => {
+          const user = check_login();
           return fetch(`http://localhost:8080/api/v1/genre/${params.id}`);
         },
         action: async ({params, request}) => {
+          const user = check_login();
           if(request.method === 'DELETE'){
             return fetch(`http://localhost:8080/api/v1/genre/${params.id}`, {
               method: 'DELETE'
@@ -99,8 +90,9 @@ const router = createBrowserRouter([
       {
         path: "genres/new",
         element: <NewGenre/>,
-        errorElement: <GenreError/>,
+        errorElement: <ErrorDisplay entity="žanrova"/>,
         action: async ({request}) => {
+          const user = check_login();
           if(request.method === 'POST'){
             const data = Object.fromEntries(await request.formData());
             return fetch(`http://localhost:8080/api/v1/genre`, {
@@ -116,19 +108,22 @@ const router = createBrowserRouter([
       {
         path: "authors",
         element: <Authors/>,
-        errorElement: <AuthorError/>,
+        errorElement: <ErrorDisplay entity="pisaca"/>,
         loader: async () => {
+          const user = check_login();
           return fetch("http://localhost:8080/api/v1/author");
         }
       },
       {
         path: "authors/:id",
         element: <Author/>,
-        errorElement: <AuthorError/>,
+        errorElement: <ErrorDisplay entity="pisaca"/>,
         loader: async ({params}) => {
+          const user = check_login();
           return fetch(`http://localhost:8080/api/v1/author/${params.id}`);
         },
         action: async ({params, request}) => {
+          const user = check_login();
           if(request.method === 'DELETE'){
             return fetch(`http://localhost:8080/api/v1/author/${params.id}`, {
               method: 'DELETE'
@@ -148,8 +143,9 @@ const router = createBrowserRouter([
       {
         path: "authors/new",
         element: <NewAuthor/>,
-        errorElement: <AuthorError/>,
+        errorElement: <ErrorDisplay entity="pisaca"/>,
         action: async ({request}) => {
+          const user = check_login();
           if(request.method === 'POST'){
             const data = Object.fromEntries(await request.formData());
             return fetch(`http://localhost:8080/api/v1/author`, {
@@ -165,8 +161,9 @@ const router = createBrowserRouter([
       {
         path: "books/:id",
         element: <Book></Book>,
-        errorElement: <BookError/>,
+        errorElement: <ErrorDisplay entity="pisaca"/>,
         loader: async ({params}) => {
+          const user = check_login();
           let b = await fetch(`http://localhost:8080/api/v1/book/${params.id}`);
           let bb = await b.json();
           let g = await fetch('http://localhost:8080/api/v1/genre/');
